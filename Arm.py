@@ -1,14 +1,17 @@
 import math
+import time
+
 from ax12 import Ax12
+from TkinterArmController import TkinterArmController
 
 class Arm(Ax12,object):
     
     _servos = [2,4,6]
     
-    L1 = 6.790  #centimeters
-    L2 = 6.855  #centimeters
-    L3 = 10.650 #centimeters
-    a1 = 1.320  #centimeters
+    _L1 = 6.790  #centimeters
+    _L2 = 6.855  #centimeters
+    _L3 = 10.650 #centimeters
+    _a1 = 1.320  #centimeters
     
     def __init__(self):
         self.setHome()
@@ -18,18 +21,18 @@ class Arm(Ax12,object):
         T2 = math.radians(theta2)
         T3 = math.radians(theta3)
         
-        A10 = [[math.cos(T1),  0, -math.sin(T1), (-a1*math.cos(T1))],
-               [math.sin(T1),  0,  math.cos(T1), (-a1*math.sin(T1))],
-               [           0, -1,             0,                 L1],
+        A10 = [[math.cos(T1),  0, -math.sin(T1), (-self._a1*math.cos(T1))],
+               [math.sin(T1),  0,  math.cos(T1), (-self._a1*math.sin(T1))],
+               [           0, -1,             0,                 self._L1],
                [           0,  0,             0,                  1]]
         
-        A21 = [[math.cos(-T2), -math.sin(-T2), 0, (L2*math.cos(-T2))],
-               [math.sin(-T2),  math.cos(-T2), 0, (L2*math.sin(-T2))],
+        A21 = [[math.cos(-T2), -math.sin(-T2), 0, (self._L2*math.cos(-T2))],
+               [math.sin(-T2),  math.cos(-T2), 0, (self._L2*math.sin(-T2))],
                [            0,              0, 1,                  0],
                [            0,              0, 0,                  1]]
         
-        A32 = [[math.cos(-T3),  0, -math.sin(-T3), (L3*math.cos(-T3))],
-               [math.sin(-T3),  0,  math.cos(-T3), (L3*math.sin(-T3))],
+        A32 = [[math.cos(-T3),  0, -math.sin(-T3), (self._L3*math.cos(-T3))],
+               [math.sin(-T3),  0,  math.cos(-T3), (self._L3*math.sin(-T3))],
                [            0, -1,              0,                  0],
                [            0,  0,              0,                  1]]
         
@@ -39,10 +42,10 @@ class Arm(Ax12,object):
     
     def IK(self,x,y,z):
         T1 = math.atan2(y,x)
-        T3 = -(math.acos((math.pow(x,2) +math.pow(y, 2) + math.pow((z-L1),2) - math.pow(L3,2) - math.pow((L2-a1),2))/(2*(L2-a1)*L3)));
+        T3 = -(math.acos((math.pow(x,2) +math.pow(y, 2) + math.pow((z-self._L1),2) - math.pow(self._L3,2) - math.pow((self._L2-self._a1),2))/(2*(self._L2-self._a1)*self._L3)));
         
-        tangPhi = (z - L1)/(math.sqrt(math.pow(x,2)+math.pow(y,2)))
-        tangBeta = (math.sin(T3)*L3)/((L2-a1)+(math.cos(T3)*L3))
+        tangPhi = (z - self._L1)/(math.sqrt(math.pow(x,2)+math.pow(y,2)))
+        tangBeta = (math.sin(T3)*self._L3)/((self._L2-self._a1)+(math.cos(T3)*self._L3))
         
         T2 = math.atan2((tangPhi - tangBeta),(1+(tangPhi*tangBeta)))
         
@@ -61,3 +64,8 @@ class Arm(Ax12,object):
         decToAngles = [((150.0/511.0)*(511.0-dec[0]))-90.0, ((150.0/511.0)*(511.0-dec[1]))+90.0, (150.0/511.0)*(511.0-dec[2])]
         
         return decToAngles
+
+    def setHome(self):
+    	tac = TkinterArmController()
+
+    	time.sleep(2)

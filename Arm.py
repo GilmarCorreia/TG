@@ -1,11 +1,15 @@
+## -*- coding: utf-8 -*-
+
 import math
 import time
+import numpy as np
 
 from ax12 import Ax12
 from TkinterArmController import TkinterArmController
 
-class Arm(Ax12,object):
+class Arm():
     
+    arm = None
     _servos = [2,4,6]
     
     _L1 = 6.790  #centimeters
@@ -13,10 +17,11 @@ class Arm(Ax12,object):
     _L3 = 10.650 #centimeters
     _a1 = 1.320  #centimeters
 
-    _pHome = None
+    pHome = [[None, None, None],
+             [None,None,None]]
     
     def __init__(self):
-    	super()
+        self.arm = Ax12()
         self.setHome()
         
     def FK(self,theta1, theta2, theta3):
@@ -39,7 +44,7 @@ class Arm(Ax12,object):
                [            0, -1,              0,                  0],
                [            0,  0,              0,                  1]]
         
-        A30 = A10*A21*A32
+        A30 = np.matmul(A10,np.matmul(A21,A32))
         
         return A30
     
@@ -59,7 +64,7 @@ class Arm(Ax12,object):
         return anglesToDec
 
     def getServos(self):
-    	return self._servos
+        return self._servos
     
     def anglesToDec(self, angles):
         anglesToDec = [1023.0-(512.0+((511.0/150.0)*(90.0+angles[0]))), 1023.0-(512.0+((angles[1]-90.0)*(511.0/150.0))), 1023.0-(512.0+(511.0/150.0)*angles[2])]
@@ -72,15 +77,19 @@ class Arm(Ax12,object):
         return decToAngles
 
     def setHome(self):
-    	tac = TkinterArmController(self)
+        self.arm.move(self._servos[0],204)
+        self.arm.move(self._servos[1],818)
+        self.arm.move(self._servos[2],512)
+        
+        tac = TkinterArmController(self)
 
-    	time.sleep(2)
+        time.sleep(2)
 
-    	angles = self.decToAngles(tac.getDec())
-		orientation = self.FK(angles[0],angles[1],angles[2])
-		
-		self.pHome[0] = [orientation[0][3],orientation[1][3],orientation[2][3]]
-		self.pHome[1] = [tac.getDec()[0],tac.getDec()[1],tac.getDec()[2]]
-		
-		print("pHome = ({:.2}, {:.2}, {:.2})\n".format(pHome[0][0], pHome[0][1], pHome[0][2]))
+        angles = self.decToAngles(tac.getDec())
+        orientation = self.FK(angles[0],angles[1],angles[2])
+        
+        self.pHome[0] = [orientation[0][3],orientation[1][3],orientation[2][3]]
+        self.pHome[1] = [tac.getDec()[0],tac.getDec()[1],tac.getDec()[2]]
+        
+        print("pHome = ({:.2f}, {:.2f}, {:.2f})\n".format(self.pHome[0][0], self.pHome[0][1], self.pHome[0][2]))
 

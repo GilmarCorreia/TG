@@ -1,7 +1,7 @@
-
-from TouchSensorArduino import TouchSensorArduino
+## -*- coding: utf-8 -*-
+#from TouchSensorArduino import TouchSensorArduino
 from Arm import Arm
 
 #ts = TouchSensorArduino()
 
-arm = Arm()
+robo = Arm()

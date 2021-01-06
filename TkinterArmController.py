@@ -20,8 +20,9 @@ except ImportError:
     py3 = True
 
 import unknown_support
+import time
 
-arm = None
+robot = None
 w = None
 finalDec = None
 
@@ -31,8 +32,14 @@ class TopLevel:
     increment = 0
     
     def __init__(self, top=None):
-        global arm
-        dec = [arm.readPosition(servo) for servo in arm.getServos()]
+        global robot
+        time.sleep(1)
+        self.dec[0] = robot.arm.readPosition(robot.getServos()[0])
+        time.sleep(2)
+        self.dec[1] = robot.arm.readPosition(robot.getServos()[1])
+        time.sleep(2)
+        self.dec[2] = robot.arm.readPosition(robot.getServos()[2])
+        time.sleep(2)
 
         '''This class configures and populates the toplevel window.
            top is the toplevel containing window.'''
@@ -121,21 +128,21 @@ class TopLevel:
         self.TProgressbarM0.place(x=90, y=115, width=270, height=22)
         self.TProgressbarM0.configure(length="270")
         self.TProgressbarM0.configure(maximum="1023")
-        self.TProgressbarM0.configure(value=str(dec[0]))
+        self.TProgressbarM0.configure(value=str(self.dec[0]))
         self.TProgressbarM0.configure(cursor="crosshair")
 
         self.TProgressbarM1 = ttk.Progressbar(top)
         self.TProgressbarM1.place(x=90, y=170, width=270, height=22)
         self.TProgressbarM1.configure(length="270")
         self.TProgressbarM1.configure(maximum="1023")
-        self.TProgressbarM1.configure(value=str(dec[1]))
+        self.TProgressbarM1.configure(value=str(self.dec[1]))
         self.TProgressbarM1.configure(cursor="crosshair")
 
         self.TProgressbarM2 = ttk.Progressbar(top)
         self.TProgressbarM2.place(x=90, y=225, width=270, height=22)
         self.TProgressbarM2.configure(length="270")
         self.TProgressbarM2.configure(maximum="1023")
-        self.TProgressbarM2.configure(value=str(dec[2]))
+        self.TProgressbarM2.configure(value=str(self.dec[2]))
         self.TProgressbarM2.configure(cursor="fleur")
 
         self.ButtonM02 = tk.Button(top, command = self.buttonAddM0)
@@ -216,7 +223,7 @@ class TopLevel:
         self.ButtonM11.configure(pady="0")
         self.ButtonM11.configure(text='''˂''')
 
-        self.ButtonDone = tk.Button(top)
+        self.ButtonDone = tk.Button(top, command = self.buttonDone)
         self.ButtonDone.place(x=270, y=290, height=34, width=83)
         self.ButtonDone.configure(activebackground="#ececec")
         self.ButtonDone.configure(activeforeground="#000000")
@@ -235,7 +242,7 @@ class TopLevel:
         self.LabelM0.configure(disabledforeground="#a3a3a3")
         self.LabelM0.configure(font="-family {Segoe UI} -size 11")
         self.LabelM0.configure(foreground="#000000")
-        self.LabelM0.configure(text='''M0: 50''')
+        self.LabelM0.configure(text='''M0: '''+str(self.dec[0]))
 
         self.LabelM2 = tk.Label(top)
         self.LabelM2.place(x=90, y=209, height=16, width=272)
@@ -247,7 +254,7 @@ class TopLevel:
         self.LabelM2.configure(foreground="#000000")
         self.LabelM2.configure(highlightbackground="#d9d9d9")
         self.LabelM2.configure(highlightcolor="black")
-        self.LabelM2.configure(text='''M2: 512''')
+        self.LabelM2.configure(text='''M2: '''+str(self.dec[2]))
 
         self.LabelM1 = tk.Label(top)
         self.LabelM1.place(x=90, y=154, height=16, width=272)
@@ -259,7 +266,7 @@ class TopLevel:
         self.LabelM1.configure(foreground="#000000")
         self.LabelM1.configure(highlightbackground="#d9d9d9")
         self.LabelM1.configure(highlightcolor="black")
-        self.LabelM1.configure(text='''M1: 900''')
+        self.LabelM1.configure(text='''M1: '''+str(self.dec[1]))
 
     def buttonIncrement100(self):
         self.increment = 100
@@ -271,7 +278,7 @@ class TopLevel:
         self.increment = 1
 
     def setDecServos(self, servo, add = True):
-        global arm
+        global robot
 
         if add:
             self.dec[servo] = self.dec[servo] + self.increment
@@ -283,51 +290,50 @@ class TopLevel:
         elif self.dec[servo] < 0:
             self.dec[servo] = 0
 
-        arm.setPosition(arm.getServos()[servo],self.dec[servo])
+        robot.arm.move(robot.getServos()[servo],self.dec[servo])
 
         return self.dec[servo]
 
     def buttonAddM0(self):
-        value = setDecServos(0,True) 
+        value = self.setDecServos(0,True) 
 
         self.LabelM0.configure(text='''M0: '''+str(value))
         self.TProgressbarM0.configure(value=str(value))
 
     def buttonAddM1(self):
-        value = setDecServos(1,True) 
+        value = self.setDecServos(1,True) 
 
         self.LabelM1.configure(text='''M1: '''+str(value))
         self.TProgressbarM1.configure(value=str(value))
 
     def buttonAddM2(self):
-        value = setDecServos(2,True) 
+        value = self.setDecServos(2,True) 
 
         self.LabelM2.configure(text='''M2: '''+str(value))
         self.TProgressbarM2.configure(value=str(value))
 
     def buttonSubM0(self):
-        value = setDecServos(0,False) 
+        value = self.setDecServos(0,False) 
 
         self.LabelM0.configure(text='''M0: '''+str(value))
         self.TProgressbarM0.configure(value=str(value))
 
     def buttonSubM1(self):
-        value = setDecServos(1,False) 
+        value = self.setDecServos(1,False) 
 
         self.LabelM1.configure(text='''M1: '''+str(value))
         self.TProgressbarM1.configure(value=str(value))
 
     def buttonSubM2(self):
-        value = setDecServos(2,False) 
+        value = self.setDecServos(2,False) 
 
         self.LabelM2.configure(text='''M2: '''+str(value))
         self.TProgressbarM2.configure(value=str(value))
 
     def buttonDone(self):
-        global w, finalDec
+        global root, finalDec
         finalDec = self.dec
-        w.destroy()
-        w = None
+        root.destroy()
 
 class TkinterArmController(tk.Frame):
 
@@ -357,7 +363,7 @@ class TkinterArmController(tk.Frame):
         w.destroy()
         w = None
 
-    def __init__(self, robot, master=None):
-        global arm
-        arm = robot
+    def __init__(self, robotArm, master=None):
+        global robot
+        robot = robotArm
         self.vp_start_gui()

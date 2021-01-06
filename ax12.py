@@ -5,12 +5,12 @@ https://github.com/jes1510/python_dynamixels
 and Josue Alejandro Savage's Arduino library:
 http://savageelectronics.blogspot.it/2011/01/arduino-y-dynamixel-ax-12.html
 '''
-
+## -*- coding: utf-8 -*-
 from time import sleep
 from serial import Serial
 import RPi.GPIO as GPIO
 
-class Ax12:
+class Ax12(object):
     # important AX-12 constants
     # /////////////////////////////////////////////////////////// EEPROM AREA
     AX_MODEL_NUMBER_L = 0
@@ -618,17 +618,8 @@ class Ax12:
         self.direction(Ax12.RPI_DIRECTION_RX)
         reply = Ax12.port.read(8)
         
-        if(ord(reply[6])==1):
-            print("Position of Motor" + str(id) + " is: " + str(ord(reply[5])+256))
-        else:
-            if(ord(reply[6])==2):
-                print("Position of Motor" + str(id) + " is: " + str(ord(reply[5])+512))
-            else:
-                if(ord(reply[6])==3):
-                    print("Position of Motor" + str(id) + " is: " + str(ord(reply[5])+768))
-                else:
-                    print("Position of Motor" + str(id) + " is: " + str(ord(reply[5])))
-                
+        print("Position of Motor " + str(id) + " is: " + str(ord(reply[5])+(256*ord(reply[6]))))
+        return ord(reply[5])+(256*ord(reply[6]))
 
     def readVoltage(self, id):
         self.direction(Ax12.RPI_DIRECTION_TX)

@@ -21,12 +21,19 @@ except ImportError:
 
 import unknown_support
 
+arm = None
+w = None
+finalDec = None
+
 class TopLevel:
 
     dec = [0, 0, 0]
     increment = 0
     
     def __init__(self, top=None):
+        global arm
+        dec = [arm.readPosition(servo) for servo in arm.getServos()]
+
         '''This class configures and populates the toplevel window.
            top is the toplevel containing window.'''
         _bgcolor = '#d9d9d9'  # X11 color: 'gray85'
@@ -114,21 +121,21 @@ class TopLevel:
         self.TProgressbarM0.place(x=90, y=115, width=270, height=22)
         self.TProgressbarM0.configure(length="270")
         self.TProgressbarM0.configure(maximum="1023")
-        self.TProgressbarM0.configure(value="0.0")
+        self.TProgressbarM0.configure(value=str(dec[0]))
         self.TProgressbarM0.configure(cursor="crosshair")
 
         self.TProgressbarM1 = ttk.Progressbar(top)
         self.TProgressbarM1.place(x=90, y=170, width=270, height=22)
         self.TProgressbarM1.configure(length="270")
         self.TProgressbarM1.configure(maximum="1023")
-        self.TProgressbarM1.configure(value="0.0")
+        self.TProgressbarM1.configure(value=str(dec[1]))
         self.TProgressbarM1.configure(cursor="crosshair")
 
         self.TProgressbarM2 = ttk.Progressbar(top)
         self.TProgressbarM2.place(x=90, y=225, width=270, height=22)
         self.TProgressbarM2.configure(length="270")
         self.TProgressbarM2.configure(maximum="1023")
-        self.TProgressbarM2.configure(value="0.0")
+        self.TProgressbarM2.configure(value=str(dec[2]))
         self.TProgressbarM2.configure(cursor="fleur")
 
         self.ButtonM02 = tk.Button(top, command = self.buttonAddM0)
@@ -263,60 +270,70 @@ class TopLevel:
     def buttonIncrement1(self):
         self.increment = 1
 
-    def buttonAddM0(self):
-        self.dec[0] = self.dec[0] + self.increment
-        if self.dec[0] > 1023:
-            self.dec[0] = 1023
+    def setDecServos(self, servo, add = True):
+        global arm
 
-        self.LabelM0.configure(text='''M0: '''+str(self.dec[0]))
-        self.TProgressbarM0.configure(value=str(self.dec[0]))
+        if add:
+            self.dec[servo] = self.dec[servo] + self.increment
+        else:
+            self.dec[servo] = self.dec[servo] - self.increment
+
+        if self.dec[servo] > 1023:
+            self.dec[servo] = 1023
+        elif self.dec[servo] < 0:
+            self.dec[servo] = 0
+
+        arm.setPosition(arm.getServos()[servo],self.dec[servo])
+
+        return self.dec[servo]
+
+    def buttonAddM0(self):
+        value = setDecServos(0,True) 
+
+        self.LabelM0.configure(text='''M0: '''+str(value))
+        self.TProgressbarM0.configure(value=str(value))
 
     def buttonAddM1(self):
-        self.dec[1] = self.dec[1] + self.increment
-        if self.dec[1] > 1023:
-            self.dec[1] = 1023
+        value = setDecServos(1,True) 
 
-        self.LabelM1.configure(text='''M1: '''+str(self.dec[1]))
-        self.TProgressbarM1.configure(value=str(self.dec[1]))
+        self.LabelM1.configure(text='''M1: '''+str(value))
+        self.TProgressbarM1.configure(value=str(value))
 
     def buttonAddM2(self):
-        self.dec[2] = self.dec[2] + self.increment
-        if self.dec[2] > 1023:
-            self.dec[2] = 1023
+        value = setDecServos(2,True) 
 
-        self.LabelM2.configure(text='''M2: '''+str(self.dec[2]))
-        self.TProgressbarM2.configure(value=str(self.dec[2]))
+        self.LabelM2.configure(text='''M2: '''+str(value))
+        self.TProgressbarM2.configure(value=str(value))
 
     def buttonSubM0(self):
-        self.dec[0] = self.dec[0] - self.increment
-        if self.dec[0] < 0:
-            self.dec[0] = 0
+        value = setDecServos(0,False) 
 
-        self.LabelM0.configure(text='''M0: '''+str(self.dec[0]))
-        self.TProgressbarM0.configure(value=str(self.dec[0]))
+        self.LabelM0.configure(text='''M0: '''+str(value))
+        self.TProgressbarM0.configure(value=str(value))
 
     def buttonSubM1(self):
-        self.dec[1] = self.dec[1] - self.increment
-        if self.dec[1] < 0:
-            self.dec[1] = 0
+        value = setDecServos(1,False) 
 
-        self.LabelM1.configure(text='''M1: '''+str(self.dec[1]))
-        self.TProgressbarM1.configure(value=str(self.dec[1]))
+        self.LabelM1.configure(text='''M1: '''+str(value))
+        self.TProgressbarM1.configure(value=str(value))
 
     def buttonSubM2(self):
-        self.dec[2] = self.dec[2] - self.increment
-        if self.dec[2] < 0:
-            self.dec[2] = 0
+        value = setDecServos(2,False) 
 
-        self.LabelM2.configure(text='''M2: '''+str(self.dec[2]))
-        self.TProgressbarM2.configure(value=str(self.dec[2]))
+        self.LabelM2.configure(text='''M2: '''+str(value))
+        self.TProgressbarM2.configure(value=str(value))
 
     def buttonDone(self):
-        pass
+        global w, finalDec
+        finalDec = self.dec
+        w.destroy()
+        w = None
 
 class TkinterArmController(tk.Frame):
 
-    w = None
+    def getDec(self):
+        global finalDec
+        return finalDec
 
     def vp_start_gui(self):
         global val, w, root
@@ -340,7 +357,7 @@ class TkinterArmController(tk.Frame):
         w.destroy()
         w = None
 
-    def __init__(self,master=None):
+    def __init__(self, robot, master=None):
+        global arm
+        arm = robot
         self.vp_start_gui()
-
-teste = TkinterArmController()

@@ -83,3 +83,4 @@ class Arm(Ax12,object):
 		self.pHome[1] = [tac.getDec()[0],tac.getDec()[1],tac.getDec()[2]]
 		
 		print("pHome = ({:.2}, {:.2}, {:.2})\n".format(pHome[0][0], pHome[0][1], pHome[0][2]))
+

@@ -1,4 +1,7 @@
 
 from TouchSensorArduino import TouchSensorArduino
+from Arm import Arm
 
-ts = TouchSensorArduino()
+#ts = TouchSensorArduino()
+
+arm = Arm()

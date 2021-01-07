@@ -1,6 +1,7 @@
 ## -*- coding: utf-8 -*-
 
 import math
+import cmath
 import time
 import numpy as np
 
@@ -62,12 +63,14 @@ class Arm():
     
     def IK(self,x,y,z):
         T1 = math.atan2(y,x)
-        T3 = -(math.acos((math.pow(x,2) +math.pow(y, 2) + math.pow((z-self._L1),2) - math.pow(self._L3,2) - math.pow((self._L2-self._a1),2))/(2*(self._L2-self._a1)*self._L3)));
+    	arg = (math.pow(x,2) +math.pow(y, 2) + math.pow((z-self._L1),2) - math.pow(self._L3,2) - math.pow((self._L2-self._a1),2))/(2*(self._L2-self._a1)*self._L3)
+
+    	T3 = -(cmath.acos(arg)).real
         
-        tangPhi = (z - self._L1)/(math.sqrt(math.pow(x,2)+math.pow(y,2)))
-        tangBeta = (math.sin(T3)*self._L3)/((self._L2-self._a1)+(math.cos(T3)*self._L3))
-        
-        T2 = math.atan2((tangPhi - tangBeta),(1+(tangPhi*tangBeta)))
+    	tangPhi = (z - self._L1)/(math.sqrt(math.pow(x,2)+math.pow(y,2)))
+    	tangBeta = (math.sin(T3)*self._L3)/((self._L2-self._a1)+(math.cos(T3)*self._L3))
+       
+    	T2 = math.atan2((tangPhi - tangBeta),(1+(tangPhi*tangBeta)))
         
         angles = [math.degrees(T1), math.degrees(T2), math.degrees(T3)]
         

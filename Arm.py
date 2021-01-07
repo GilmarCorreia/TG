@@ -69,7 +69,7 @@ class Arm():
         
         T2 = math.atan2((tangPhi - tangBeta),(1+(tangPhi*tangBeta)))
         
-        angles = [math.degress(T1), math.degress(T2), math.degress(T3)]
+        angles = [math.degrees(T1), math.degrees(T2), math.degrees(T3)]
         
         anglesToDec = self.verifyDec(self.anglesToDec(angles))
         
@@ -135,6 +135,46 @@ class Arm():
         decToAngles = [((150.0/511.0)*(511.0-dec[0]))-90.0, ((150.0/511.0)*(511.0-dec[1]))+90.0, (150.0/511.0)*(511.0-dec[2])]
 
         return decToAngles
+    
+    def coveredPath(self):
+
+        x_p = np.arange(0,10,0.1)
+        y_p = np.arange(-5,5,0.1)
+        z_p = [0] * len(x_p)
+
+        path = [[x,y,0] for x in x_p for y in y_p]
+    
+        return path
+
+    def verifyPoint(self, point):
+        angles = self.IK(point[0],point[1],point[2])
+        angles = self.decToAngles(angles)
+        posArm = self.FK(angles[0],angles[1],angles[2])
+        
+        print("desPoint: " + str(point[0]) + ", actualPoint: " + str(posArm[0][3]))
+
+        x = point[0] - posArm[0][3]
+        y = point[1] - posArm[1][3]
+        z = point[2] - posArm[2][3]
+        
+        dist = math.sqrt(math.pow(x,2) + math.pow(y,2) + math.pow(z,2))
+
+        print(dist)
+        if dist <= 0.5:
+            return True
+        else:
+            return False
+
+    def runMapping(self):
+
+        path = self.coveredPath()
+
+        for point in path:
+            if self.verifyPoint(point):
+                pass
+                #print("x: " + str(point[0]) + ", y: " + str(point[1]) + ", z: " + str(point[2]))
+                #self.arm.move(self.IK(point[0],point[1],point[2]))
+                #time.sleep(0.5)
 
     def setHome(self):
         self.arm.move(self._servos[0],204)
@@ -155,34 +195,5 @@ class Arm():
 
         self.runMapping()
 
-    def coveredPath(self):
-
-    	x_p = np.arrange(0,10,0.1).toList()
-    	y_p = np.arrange(-5,5,0.1).toList()
-    	z_p = [0] * x_p.length()
-
-    	path = [[x,y,0] for x in x_p for y in y_p]
-
-   		return path
-
-   	def verifyPoint(self, point):
-   		angles = self.IK(point[0],point[1],point[2])
-   		posArm = self.FK(angles[0],angles[1],angles[2])
-
-   		dist = math.sqrt(math.pow(point[0] - posArm[0],2) + math.pow(point[1] - posArm[1],2) + math.pow(point[2] - posArm[2],2))
-
-   		if dist <= 0.5:
-   			return True
-   		else:
-   			return False
-
-   	def runMapping(self):
-
-   		path = self.coveredPath()
-
-   		for point in path:
-   			if self.verifyPoint(point):
-   				print("x: " + str(point[0]) + ", y: " + str(point[1]) + ", z: " + str(point[2]))
-   				#self.arm.move(self.IK(point[0],point[1],point[2]))
-   				#time.sleep(0.5)
+    
 

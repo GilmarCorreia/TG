@@ -182,6 +182,7 @@ class Arm():
 
    		for point in path:
    			if self.verifyPoint(point):
-   				self.arm.move(self.IK(point[0],point[1],point[2]))
-   				time.sleep(0.5)
+   				print("x: " + str(point[0]) + ", y: " + str(point[1]) + ", z: " + str(point[2]))
+   				#self.arm.move(self.IK(point[0],point[1],point[2]))
+   				#time.sleep(0.5)
 

@@ -36,8 +36,6 @@ class Arm():
 
     	angles = [theta1,theta2,theta3]
 
-    	[theta1,theta2,theta3] = self.verifyAngles(angles)
-
         T1 = math.radians(theta1)
         T2 = math.radians(theta2)
         T3 = math.radians(theta3)

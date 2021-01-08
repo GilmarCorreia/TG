@@ -30,12 +30,12 @@ class Arm():
     
     def __init__(self):
         self.arm = Ax12()
-        #self.setHome()
-        self.runMapping()
+        self.setHome()
+        #self.runMapping()
         
     def FK(self,theta1, theta2, theta3):
 
-    	angles = [theta1,theta2,theta3]
+        angles = [theta1,theta2,theta3]
 
         T1 = math.radians(theta1)
         T2 = math.radians(theta2)
@@ -62,14 +62,14 @@ class Arm():
     
     def IK(self,x,y,z):
         T1 = math.atan2(y,x)
-    	arg = (math.pow(x,2) +math.pow(y, 2) + math.pow((z-self._L1),2) - math.pow(self._L3,2) - math.pow((self._L2-self._a1),2))/(2*(self._L2-self._a1)*self._L3)
+        arg = (math.pow(x,2) +math.pow(y, 2) + math.pow((z-self._L1),2) - math.pow(self._L3,2) - math.pow((self._L2-self._a1),2))/(2*(self._L2-self._a1)*self._L3)
 
-    	T3 = -(cmath.acos(arg)).real
+        T3 = -(cmath.acos(arg)).real
         
-    	tangPhi = (z - self._L1)/(math.sqrt(math.pow(x,2)+math.pow(y,2)))
-    	tangBeta = (math.sin(T3)*self._L3)/((self._L2-self._a1)+(math.cos(T3)*self._L3))
-       
-    	T2 = math.atan2((tangPhi - tangBeta),(1+(tangPhi*tangBeta)))
+        tangPhi = (z - self._L1)/(math.sqrt(math.pow(x,2)+math.pow(y,2)))
+        tangBeta = (math.sin(T3)*self._L3)/((self._L2-self._a1)+(math.cos(T3)*self._L3))
+    
+        T2 = math.atan2((tangPhi - tangBeta),(1+(tangPhi*tangBeta)))
         
         angles = [math.degrees(T1), math.degrees(T2), math.degrees(T3)]
         
@@ -79,54 +79,54 @@ class Arm():
 
     def verifyAngles(self, angles):
     
-    	if angles[0] > self.maxT1:
-    		angles[0] = self.maxT1
-    	elif angles[0] < self.minT1:
-    		angles[0] = self.minT1 
+        if angles[0] > self.maxT1:
+            angles[0] = self.maxT1
+        elif angles[0] < self.minT1:
+            angles[0] = self.minT1 
 
-    	if angles[1] > self.maxT2:
-    		angles[1] = self.maxT2
-    	elif angles[1] < self.minT2:
-    		angles[1] = self.minT2
+        if angles[1] > self.maxT2:
+            angles[1] = self.maxT2
+        elif angles[1] < self.minT2:
+            angles[1] = self.minT2
 
-    	if angles[2] > self.maxT3:
-    		angles[2] = self.maxT3
-    	elif angles[2] < self.minT3:
-    		angles[2] = self.minT3
+        if angles[2] > self.maxT3:
+            angles[2] = self.maxT3
+        elif angles[2] < self.minT3:
+            angles[2] = self.minT3
 
-    	return angles
+        return angles
 
     def verifyDec(self, decs):
 
-    	if decs[0] > self.maxT1:
-    		decs[0] = self.maxT1
-    	elif decs[0] < self.minT1:
-    		decs[0] = self.minT1 
+        if decs[0] > self.maxT1:
+            decs[0] = self.maxT1
+        elif decs[0] < self.minT1:
+            decs[0] = self.minT1 
 
-    	if decs[1] > self.maxT2:
-    		decs[1] = self.maxT2
-    	elif decs[1] < self.minT2:
-    		decs[1] = self.minT2
+        if decs[1] > self.maxT2:
+            decs[1] = self.maxT2
+        elif decs[1] < self.minT2:
+            decs[1] = self.minT2
 
-    	if decs[2] > self.maxT3:
-    		decs[2] = self.maxT3
-    	elif decs[2] < self.minT3:
-    		decs[2] = self.minT3
+        if decs[2] > self.maxT3:
+            decs[2] = self.maxT3
+        elif decs[2] < self.minT3:
+            decs[2] = self.minT3
 
-    	return decs
+        return decs
 
     def getServos(self):
         return self._servos
 
     def maxAngles(self):
-    	maxAngles = self.decToAngles(self.maxT1, self.maxT2, self.maxT3)
+        maxAngles = self.decToAngles(self.maxT1, self.maxT2, self.maxT3)
 
-    	return maxAngles
+        return maxAngles
 
     def minAngles(self):
-    	minAngles = self.decToAngles(self.minT1, self.minT2, self.minT3)
+        minAngles = self.decToAngles(self.minT1, self.minT2, self.minT3)
 
-    	return minAngles
+        return minAngles
     
     def anglesToDec(self, angles):
         anglesToDec = [1023.0-(512.0+((511.0/150.0)*(90.0+angles[0]))), 1023.0-(512.0+((angles[1]-90.0)*(511.0/150.0))), 1023.0-(512.0+(511.0/150.0)*angles[2])]

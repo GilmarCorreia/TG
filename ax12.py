@@ -166,7 +166,9 @@ class Ax12(object):
     class timeoutError(Exception) : pass
 
     def direction(self,d):
+        GPIO.setup(self.RPI_DIRECTION_PIN, GPIO.OUT)
         GPIO.output(self.RPI_DIRECTION_PIN, d)
+        
         sleep(self.RPI_DIRECTION_SWITCH_DELAY)
 
     def readData(self,id):
@@ -613,36 +615,38 @@ class Ax12(object):
         self.port.write(chr(self.AX_BYTE_READ_POS))
         self.port.write(chr(checksum))
         
-        sleep(self.TX_DELAY_TIME)
+        #sleep(0.0004)
         
         self.direction(self.RPI_DIRECTION_RX)
 
         #Position_Long_Byte = -1
-		#Time_Counter = 0
-    	#while ((availableData() < 7) & (Time_Counter < self.RX_TIME_OUT)):
-		#	Time_Counter++
-		#	sleep(0.001)
-
-		while self.port.inWaiting():
-			Incoming_Byte = self.port.readLine()
-			if ( (Incoming_Byte == 255) ):
-				char1 = self.port.readLine()
-				char2 = self.port.readLine()
-				char3 = self.port.readLine()
-
-				Error_Byte = self.port.readLine()
-
-				if( Error_Byte != 0 ):
-					return (Error_Byte * (-1))
-
-				Position_Low_Byte = self.port.readLine();      
-				Position_High_Byte = self.port.readLine();
-				Position_Long_Byte = Position_High_Byte << 8; 
-				Position_Long_Byte = Position_Long_Byte + Position_Low_Byte;
-
+        #Time_Counter = 0
+        #while ((self.port.inWaiting() < 7) & (Time_Counter < self.RX_TIME_OUT)):
+         #   Time_Counter = Time_Counter + 1
+        #    sleep(0.001)
         
-        print("Position of Motor " + str(id) + " is: " + str(ord(Position_Long_Byte)))
-        return ord(Position_Long_Byte)
+        Position_Long_Byte = None
+        
+        while self.port.inWaiting() > 0:
+            
+            Incoming_Byte = self.port.read(1)
+            
+            if ( ord(Incoming_Byte) == 255 ):
+                
+                reply = self.port.read(7)
+                
+                Position_Low_Byte = ord(reply[4])
+                Position_High_Byte = ord(reply[5])
+                
+                Position_Long_Byte = (256*Position_High_Byte) + Position_Low_Byte
+                
+        
+        if Position_Long_Byte != None:
+            print("Position of Motor " + str(id) + " is: " + str(Position_Long_Byte))
+            
+            return str(Position_Long_Byte)
+        else:
+            return -1
 
     def readVoltage(self, id):
         self.direction(self.RPI_DIRECTION_TX)

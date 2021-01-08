@@ -30,7 +30,8 @@ class Arm():
     
     def __init__(self):
         self.arm = Ax12()
-        self.setHome()
+        #self.setHome()
+        self.runMapping()
         
     def FK(self,theta1, theta2, theta3):
 
@@ -74,7 +75,7 @@ class Arm():
         
         anglesToDec = self.verifyDec(self.anglesToDec(angles))
         
-        return anglesToDec
+        return angles
 
     def verifyAngles(self, angles):
     
@@ -139,20 +140,21 @@ class Arm():
     
     def coveredPath(self):
 
-        x_p = np.arange(0,10,0.1)
-        y_p = np.arange(-5,5,0.1)
+        x_p = np.arange(5,12.1,0.1)
+        y_p = np.arange(-5,0.1,0.1)
         z_p = [0] * len(x_p)
-
-        path = [[x,y,0] for x in x_p for y in y_p]
+        
+        path = []
+        for x in x_p:
+            for y in y_p:
+                path.append([x,y,2])
     
         return path
 
     def verifyPoint(self, point):
         angles = self.IK(point[0],point[1],point[2])
-        angles = self.decToAngles(angles)
+        #angles = self.decToAngles(angles)
         posArm = self.FK(angles[0],angles[1],angles[2])
-        
-        print("desPoint: " + str(point[0]) + ", actualPoint: " + str(posArm[0][3]))
 
         x = point[0] - posArm[0][3]
         y = point[1] - posArm[1][3]
@@ -160,8 +162,8 @@ class Arm():
         
         dist = math.sqrt(math.pow(x,2) + math.pow(y,2) + math.pow(z,2))
 
-        print(dist)
-        if dist <= 0.5:
+        #print(dist)
+        if dist <= 1.0:
             return True
         else:
             return False
@@ -172,10 +174,15 @@ class Arm():
 
         for point in path:
             if self.verifyPoint(point):
-                pass
-                #print("x: " + str(point[0]) + ", y: " + str(point[1]) + ", z: " + str(point[2]))
-                #self.arm.move(self.IK(point[0],point[1],point[2]))
-                #time.sleep(0.5)
+               # pass
+                print("x: " + str(point[0]) + ", y: " + str(point[1]) + ", z: " + str(point[2]))
+                dec = self.anglesToDec(self.IK(point[0],point[1],point[2]))
+                
+                self.arm.move(self._servos[0],int(round(dec[0],0)))
+                self.arm.move(self._servos[1],int(round(dec[1],0)))
+                self.arm.move(self._servos[2],int(round(dec[2],0)))
+                
+                time.sleep(0.05)
 
     def setHome(self):
         self.arm.move(self._servos[0],204)

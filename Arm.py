@@ -5,6 +5,7 @@ import cmath
 import time
 import numpy as np
 import threading
+import matplotlib.pyplot as plt
 
 from ax12 import Ax12
 from TkinterArmController import TkinterArmController
@@ -29,6 +30,10 @@ class Arm():
     minT1 = 0
 
     ts = None
+    
+    xo = []
+    yo = []
+    zo = []
 
     pHome = [[None, None, None],
              [None,None,None]]
@@ -148,7 +153,7 @@ class Arm():
     
     def coveredPath(self):
 
-        x_p = np.arange(5,12.1,0.1)
+        x_p = np.arange(7,12.1,0.1)
         y_p = np.arange(-5,0.1,0.1)
         z_p = [0] * len(x_p)
         
@@ -176,23 +181,6 @@ class Arm():
         else:
             return False
 
-    def runMapping(self):
-
-        path = self.coveredPath()
-
-        for point in path:
-            if self.verifyPoint(point):
-               # pass
-                print(self.ts.getForce())
-                print("x: " + str(point[0]) + ", y: " + str(point[1]) + ", z: " + str(point[2]))
-                dec = self.anglesToDec(self.IK(point[0],point[1],point[2]))
-                
-                self.arm.move(self._servos[0],int(round(dec[0],0)))
-                self.arm.move(self._servos[1],int(round(dec[1],0)))
-                self.arm.move(self._servos[2],int(round(dec[2],0)))
-                
-                time.sleep(0.05)
-
     def setHome(self):
         self.arm.move(self._servos[0],204)
         self.arm.move(self._servos[1],818)
@@ -212,5 +200,46 @@ class Arm():
 
         #self.runMapping()
 
-    
+    def runMapping(self):
 
+        path = self.coveredPath()
+
+        for point in path:
+            if self.verifyPoint(point):
+                
+                offset_z = 3.0
+
+                dec = self.anglesToDec(self.IK(point[0],point[1],point[2]+offset_z))
+                
+                self.arm.move(self._servos[0],int(round(dec[0],0)))
+                self.arm.move(self._servos[1],int(round(dec[1],0)))
+                self.arm.move(self._servos[2],int(round(dec[2]+offset_z,0)))
+                    
+                for z in np.arange(point[2]+offset_z,point[2],-0.1):
+                    force = self.ts.getForce()
+                    print(force)
+                        
+                    if force < 100:
+                        print("x: " + str(point[0]) + ", y: " + str(point[1]) + ", z: " + str(z))
+                        dec = self.anglesToDec(self.IK(point[0],point[1],z))
+                
+                        self.arm.move(self._servos[0],int(round(dec[0],0)))
+                        self.arm.move(self._servos[1],int(round(dec[1],0)))
+                        self.arm.move(self._servos[2],int(round(dec[2],0)))
+                
+                        time.sleep(0.05)
+                    else:
+                        time.sleep(1)
+                        self.xo.append(point[0])
+                        self.yo.append(point[1])
+                        self.zo.append(z)
+                        break
+                        
+            
+            fig = plt.figure()
+            ax = fig.add_subplot(111)
+        
+            ax.scatter(self.xo, self.yo, self.zo)
+
+            plt.show()
+                

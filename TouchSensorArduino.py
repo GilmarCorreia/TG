@@ -29,7 +29,7 @@ class TouchSensorArduino(SerialArduino,object):
 	millisFinalTime = None
 
 	def __init__(self):
-		super().__init__()
+		SerialArduino.__init__(self)
 
 	## SETTERS
 
@@ -66,51 +66,53 @@ class TouchSensorArduino(SerialArduino,object):
 
 	def run(self):
 		
-		try:
-			self.buf = [int(prot) for prot in self.getInputValue().split(",")]
+		#try:
+			#print(self.getInputValue())
+		self.buf = [int(prot) for prot in self.getInputValue().split(",")]
 
-			if(self.buf[0] == self.TS_START):
-				if(self.buf[1] == self.TS_START):
-					if(self.buf[2] == self.TS_WRITE):
-						lengthMsg = self.buf[3]
-						dataType = self.buf[4]
-						checkSum = None
+		if(self.buf[0] == self.TS_START):
+			if(self.buf[1] == self.TS_START):
+				if(self.buf[2] == self.TS_WRITE):
+					lengthMsg = self.buf[3]
+					dataType = self.buf[4]
+					checkSum = None
 
-						if (dataType == self.TS_FORCE_BEGIN):
-							force = 0
-							force = self.buf[5]
-							force = force + self.convert(self.buf[6])
+					if (dataType == self.TS_FORCE_BEGIN):
+						force = 0
+						force = self.buf[5]
+						force = force + self.convert(self.buf[6])
 
-							checkSum = (~(self.TS_WRITE+self.TS_FORCE_BEGIN_LENGTH+self.TS_FORCE_BEGIN+(force&0xFF)+(force>>8)))&0xFF
+						checkSum = (~(self.TS_WRITE+self.TS_FORCE_BEGIN_LENGTH+self.TS_FORCE_BEGIN+(force&0xFF)+(force>>8)))&0xFF
 
-							if (checkSum == self.buf[7]):
+						if (checkSum == self.buf[7]):
 
-								if(self.getControlTime()):
-									self.__setMillisInitialTime(int(round(time.time() * 1000)))
-									self.__setControlTime(False)
+							if(self.getControlTime()):
+								self.__setMillisInitialTime(int(round(time.time() * 1000)))
+								self.__setControlTime(False)
 
-								self.__setForce(force)
+							self.__setForce(force)
+							#print(force)
 
-							else:
-								print("Falha na Mensagem")
+						else:
+							print("Falha na Mensagem")
 
-						elif (dataType == self.TS_FORCE_END):
-							dataChr = self.buf[5]
+					elif (dataType == self.TS_FORCE_END):
+						dataChr = self.buf[5]
 
-							checkSum = (~(self.TS_WRITE+self.TS_FORCE_END_LENGTH+self.TS_FORCE_END+dataChr))&0xFF
+						checkSum = (~(self.TS_WRITE+self.TS_FORCE_END_LENGTH+self.TS_FORCE_END+dataChr))&0xFF
 
-							if (checkSum == self.buf[6]):
-								if(not(self.getControlTime())):
-									self.__setMillisFinalTime(int(round(time.time() * 1000)))
-									self.__setControlTime(True)
+						if (checkSum == self.buf[6]):
+							if(not(self.getControlTime())):
+								self.__setMillisFinalTime(int(round(time.time() * 1000)))
+								self.__setControlTime(True)
 
-								self.__setForce(0)
+							self.__setForce(0)
 
-							else:
-								print("Falha na Mensagem")			
+						else:
+							print("Falha na Mensagem")			
 
-			else:
-				print("Erro de Comunicacao")
-		except:
-			pass
+		else:
+			print("Erro de Comunicacao")
+		#except:
+		#	pass
 		#	print("Erro de Comunicacao1")

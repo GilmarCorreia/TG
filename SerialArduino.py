@@ -6,7 +6,7 @@ import serial
 from serial import Serial
 import select
 import threading
-from Errors.NoAvailablePorts import NoAvailablePorts
+#from Errors.NoAvailablePorts import NoAvailablePorts
 
 
 class SerialArduino():
@@ -35,7 +35,7 @@ class SerialArduino():
         except (OSError, serial.SerialException):
             pass
 
-        self.__thread = threading.Thread(target=self.serialEvent(), args=(self.serialPort,))
+        self.__thread = threading.Thread(target=self.serialEvent, args=())
         self.__threadFlag = True
         self.__thread.start()
         
@@ -47,7 +47,7 @@ class SerialArduino():
         print("")
         print("Qual Porta Deseja Habilitar (Somente Numeros)?")
 
-        portNumber = input()
+        portNumber = 1 #input()
         self.__setPortName(result[int(portNumber)-1])
         print("\nPorta Habilitada: " + self.getPortName())
         
@@ -80,7 +80,7 @@ class SerialArduino():
             i = i + 1
 
         if (i==1):
-            raise NoAvailablePorts
+            raise Exception('Nao Existem Portas Disponiveis')
 
         return result
 

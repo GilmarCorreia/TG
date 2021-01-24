@@ -4,9 +4,11 @@ import math
 import cmath
 import time
 import numpy as np
+import threading
 
 from ax12 import Ax12
 from TkinterArmController import TkinterArmController
+from TouchSensorArduino import TouchSensorArduino
 
 class Arm():
     
@@ -15,7 +17,8 @@ class Arm():
     
     _L1 = 6.790  #centimeters
     _L2 = 6.855  #centimeters
-    _L3 = 10.650 #centimeters
+    #_L3 = 10.650 #centimeters
+    _L3 = 5.535
     _a1 = 1.320  #centimeters
 
     maxT3 = 866
@@ -25,13 +28,18 @@ class Arm():
     maxT1 = 1023
     minT1 = 0
 
+    ts = None
+
     pHome = [[None, None, None],
              [None,None,None]]
     
     def __init__(self):
+        
+        self.ts = TouchSensorArduino()
+        
         self.arm = Ax12()
         self.setHome()
-        #self.runMapping()
+        self.runMapping()
         
     def FK(self,theta1, theta2, theta3):
 
@@ -175,6 +183,7 @@ class Arm():
         for point in path:
             if self.verifyPoint(point):
                # pass
+                print(self.ts.getForce())
                 print("x: " + str(point[0]) + ", y: " + str(point[1]) + ", z: " + str(point[2]))
                 dec = self.anglesToDec(self.IK(point[0],point[1],point[2]))
                 
@@ -201,7 +210,7 @@ class Arm():
         
         print("pHome = ({:.2f}, {:.2f}, {:.2f})\n".format(self.pHome[0][0], self.pHome[0][1], self.pHome[0][2]))
 
-        self.runMapping()
+        #self.runMapping()
 
     
 

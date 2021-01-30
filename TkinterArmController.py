@@ -34,11 +34,11 @@ class TopLevel:
     def __init__(self, top=None):
         global robot
         time.sleep(1)
-        self.dec[0] = robot.arm.readPosition(robot.getServos()[0])
+        self.dec[0] = 204 #robot.arm.readPosition(robot.getServos()[0])
         time.sleep(2)
-        self.dec[1] = robot.arm.readPosition(robot.getServos()[1])
+        self.dec[1] = 818 #robot.arm.readPosition(robot.getServos()[1])
         time.sleep(2)
-        self.dec[2] = robot.arm.readPosition(robot.getServos()[2])
+        self.dec[2] = 512 #robot.arm.readPosition(robot.getServos()[2])
         time.sleep(2)
 
         '''This class configures and populates the toplevel window.

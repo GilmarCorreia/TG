@@ -6,6 +6,7 @@ import time
 import numpy as np
 import threading
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 
 from ax12 import Ax12
 from TkinterArmController import TkinterArmController
@@ -31,9 +32,9 @@ class Arm():
 
     ts = None
     
-    xo = []
-    yo = []
-    zo = []
+    xo = [0]
+    yo = [0]
+    zo = [0]
 
     pHome = [[None, None, None],
              [None,None,None]]
@@ -155,7 +156,7 @@ class Arm():
 
         x_p = np.arange(7,12.1,0.1)
         y_p = np.arange(-5,0.1,0.1)
-        z_p = [0] * len(x_p)
+        z_p = [-1] * len(x_p)
         
         path = []
         for x in x_p:
@@ -183,8 +184,11 @@ class Arm():
 
     def setHome(self):
         self.arm.move(self._servos[0],204)
+        time.sleep(0.1)
         self.arm.move(self._servos[1],818)
+        time.sleep(0.1)
         self.arm.move(self._servos[2],512)
+        time.sleep(0.1)
         
         tac = TkinterArmController(self)
 
@@ -227,19 +231,21 @@ class Arm():
                         self.arm.move(self._servos[1],int(round(dec[1],0)))
                         self.arm.move(self._servos[2],int(round(dec[2],0)))
                 
-                        time.sleep(0.05)
+                        time.sleep(0.005)
                     else:
-                        time.sleep(1)
+                        #time.sleep(1)
                         self.xo.append(point[0])
                         self.yo.append(point[1])
                         self.zo.append(z)
                         break
                         
-            
-            fig = plt.figure()
-            ax = fig.add_subplot(111)
+            #fig = plt.figure(figsize = (10, 7))
+        ax = plt.axes(projection ="3d")
         
-            ax.scatter(self.xo, self.yo, self.zo)
+        ax.scatter3D(self.xo, self.yo, self.zo, color = "green")
+        plt.title("simple 3D scatter plot")
 
-            plt.show()
+        plt.ion()
+        plt.show()
+        plt.pause(0.001)
                 

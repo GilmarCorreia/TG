@@ -19,8 +19,7 @@ class Arm():
     
     _L1 = 6.790  #centimeters
     _L2 = 6.855  #centimeters
-    #_L3 = 10.650 #centimeters
-    _L3 = 5.535
+    _L3 = 11.170 #centimeters
     _a1 = 1.320  #centimeters
 
     maxT3 = 866
@@ -154,14 +153,14 @@ class Arm():
     
     def coveredPath(self):
 
-        x_p = np.arange(7,12.1,0.1)
-        y_p = np.arange(-5,0.1,0.1)
-        z_p = [-1] * len(x_p)
+        x_p = np.arange(10.0,15.1,0.1)
+        y_p = np.arange(-5,5,0.1)
+        #z_p = [-1] * len(x_p)
         
         path = []
         for x in x_p:
             for y in y_p:
-                path.append([x,y,2])
+                path.append([x,y,-2])
     
         return path
 
@@ -207,17 +206,21 @@ class Arm():
     def runMapping(self):
 
         path = self.coveredPath()
+	
+	xo = []
+	yo = []
+	zo = []
 
         for point in path:
             if self.verifyPoint(point):
                 
-                offset_z = 3.0
+                offset_z = 7.0
 
                 dec = self.anglesToDec(self.IK(point[0],point[1],point[2]+offset_z))
                 
                 self.arm.move(self._servos[0],int(round(dec[0],0)))
                 self.arm.move(self._servos[1],int(round(dec[1],0)))
-                self.arm.move(self._servos[2],int(round(dec[2]+offset_z,0)))
+                self.arm.move(self._servos[2],int(round(dec[2],0)))
                     
                 for z in np.arange(point[2]+offset_z,point[2],-0.1):
                     force = self.ts.getForce()
@@ -233,10 +236,17 @@ class Arm():
                 
                         time.sleep(0.005)
                     else:
-                        #time.sleep(1)
+                        #time.sleep(2)
                         self.xo.append(point[0])
                         self.yo.append(point[1])
                         self.zo.append(z)
+                        dec = self.anglesToDec(self.IK(point[0],point[1],7.0))
+			self.arm.move(self._servos[0],int(round(dec[0],0)))
+			self.arm.move(self._servos[1],int(round(dec[1],0)))
+			self.arm.move(self._servos[2],int(round(dec[2],0)))
+			a = np.asarray([ self.xo, self.yo, self.zo ])
+			np.savetxt("foo.csv", a, delimiter=",")
+			#time.sleep(1)
                         break
                         
             #fig = plt.figure(figsize = (10, 7))

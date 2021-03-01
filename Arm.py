@@ -244,8 +244,8 @@ class Arm():
 			self.arm.move(self._servos[0],int(round(dec[0],0)))
 			self.arm.move(self._servos[1],int(round(dec[1],0)))
 			self.arm.move(self._servos[2],int(round(dec[2],0)))
-			a = np.asarray([ self.xo, self.yo, self.zo ])
-			np.savetxt("foo.csv", a, delimiter=",")
+			a = np.asarray([ point[0], point[1], z ])
+			np.savetxt("tabelaPontos.csv", a, delimiter=",")
 			#time.sleep(1)
                         break
                         

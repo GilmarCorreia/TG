@@ -153,8 +153,8 @@ class Arm():
     
     def coveredPath(self):
 
-        x_p = np.arange(10.0,15.1,0.1)
-        y_p = np.arange(-5,5,0.1)
+        x_p = np.arange(10.0,15.1,0.25)
+        y_p = np.arange(-5,5,0.25)
         #z_p = [-1] * len(x_p)
         
         path = []
@@ -222,11 +222,11 @@ class Arm():
                 self.arm.move(self._servos[1],int(round(dec[1],0)))
                 self.arm.move(self._servos[2],int(round(dec[2],0)))
                     
-                for z in np.arange(point[2]+offset_z,point[2],-0.1):
+                for z in np.arange(point[2]+offset_z,point[2],-0.3):
                     force = self.ts.getForce()
                     print(force)
                         
-                    if force < 100:
+                    if force < 50:
                         print("x: " + str(point[0]) + ", y: " + str(point[1]) + ", z: " + str(z))
                         dec = self.anglesToDec(self.IK(point[0],point[1],z))
                 
@@ -236,7 +236,7 @@ class Arm():
                 
                         time.sleep(0.005)
                     else:
-                        #time.sleep(2)
+                        time.sleep(2)
                         self.xo.append(point[0])
                         self.yo.append(point[1])
                         self.zo.append(z)
@@ -244,9 +244,9 @@ class Arm():
 			self.arm.move(self._servos[0],int(round(dec[0],0)))
 			self.arm.move(self._servos[1],int(round(dec[1],0)))
 			self.arm.move(self._servos[2],int(round(dec[2],0)))
-			a = np.asarray([ point[0], point[1], z ])
+			a = np.transpose(np.asarray([ self.xo, self.yo,self.zo ]))
 			np.savetxt("tabelaPontos.csv", a, delimiter=",")
-			#time.sleep(1)
+			time.sleep(2)
                         break
                         
             #fig = plt.figure(figsize = (10, 7))

@@ -47,7 +47,7 @@ class SerialArduino():
         print("")
         print("Qual Porta Deseja Habilitar (Somente Numeros)?")
 
-        portNumber = 1 #input()
+        portNumber = 2 #input()
         self.__setPortName(result[int(portNumber)-1])
         print("\nPorta Habilitada: " + self.getPortName())
         

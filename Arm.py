@@ -75,19 +75,21 @@ class Arm():
     
     def IK(self,x,y,z):
         T1 = math.atan2(y,x)
-        arg = (math.pow(x,2) +math.pow(y, 2) + math.pow((z-self._L1),2) - math.pow(self._L3,2) - math.pow((self._L2-self._a1),2))/(2*(self._L2-self._a1)*self._L3)
-
-        T3 = -(cmath.acos(arg)).real
+                  
+        arg = (math.pow((math.sqrt(math.pow(x,2)+math.pow(y,2))+self._a1),2) + math.pow(z-self._L1,2) - math.pow(self._L3,2) - math.pow(self._L2,2))/(2*self._L2*self._L3);
         
-        tangPhi = (z - self._L1)/(math.sqrt(math.pow(x,2)+math.pow(y,2)))
-        tangBeta = (math.sin(T3)*self._L3)/((self._L2-self._a1)+(math.cos(T3)*self._L3))
-    
+        T3 = -(cmath.acos(arg).real)
+        
+        tangPhi = (z - self._L1)/(math.sqrt(math.pow(x,2)+math.pow(y,2))+self._a1)
+        tangBeta = (math.sin(T3)*self._L3)/(self._L2+(math.cos(T3)*self._L3))
+        
         T2 = math.atan2((tangPhi - tangBeta),(1+(tangPhi*tangBeta)))
-        
+            
+        #print([T1, T2, T3])
         angles = [math.degrees(T1), math.degrees(T2), math.degrees(T3)]
-        
+            
         anglesToDec = self.verifyDec(self.anglesToDec(angles))
-        
+            
         return angles
 
     def verifyAngles(self, angles):
@@ -153,8 +155,8 @@ class Arm():
     
     def coveredPath(self):
 
-        x_p = np.arange(10.0,15.1,0.25)
-        y_p = np.arange(-5,5,0.25)
+        x_p = np.arange(12.0,12.1,0.001)
+        y_p = np.arange(0,0.1,0.001)
         #z_p = [-1] * len(x_p)
         
         path = []
@@ -228,15 +230,16 @@ class Arm():
                         
                     if force < 50:
                         print("x: " + str(point[0]) + ", y: " + str(point[1]) + ", z: " + str(z))
+                        #print(self.anglesToDec(self.IK(point[0],point[1],z)))
                         dec = self.anglesToDec(self.IK(point[0],point[1],z))
                 
                         self.arm.move(self._servos[0],int(round(dec[0],0)))
                         self.arm.move(self._servos[1],int(round(dec[1],0)))
                         self.arm.move(self._servos[2],int(round(dec[2],0)))
                 
-                        time.sleep(0.005)
+                        time.sleep(0.001)
                     else:
-                        time.sleep(2)
+                        time.sleep(1)
                         self.xo.append(point[0])
                         self.yo.append(point[1])
                         self.zo.append(z)
@@ -246,8 +249,11 @@ class Arm():
 			self.arm.move(self._servos[2],int(round(dec[2],0)))
 			a = np.transpose(np.asarray([ self.xo, self.yo,self.zo ]))
 			np.savetxt("tabelaPontos.csv", a, delimiter=",")
-			time.sleep(2)
+			time.sleep(1)
                         break
+                        
+                    #if z < -1.7:
+                    #    time.sleep(1)
                         
             #fig = plt.figure(figsize = (10, 7))
         ax = plt.axes(projection ="3d")
@@ -255,7 +261,7 @@ class Arm():
         ax.scatter3D(self.xo, self.yo, self.zo, color = "green")
         plt.title("simple 3D scatter plot")
 
-        plt.ion()
+        #plt.ion()
         plt.show()
-        plt.pause(0.001)
+        #plt.pause(0.001)
                 
